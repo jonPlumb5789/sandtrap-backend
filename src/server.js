@@ -7,7 +7,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 
 // MongoDB connection URI
-const uri = "mongodb+srv://jonplumb89:KEXeUDnC9Lo5kxLG@the-sandtrap.rzuyf.mongodb.net/the-sandtrap?retryWrites=true&w=majority";
+const uri = "mongodb+srv://jonplumb89:KEXeUDnC9Lo5kxLG@the-sandtrap.rzuyf.mongodb.net/the-sandtrap?retryWrites=true&w=majority&ssl=true";
 //const uri = "mongodb+srv://jonplumb89:KEXeUDnC9Lo5kxL@the-sandtrap.rzuyf.mongodb.net/?retryWrites=true&w=majority&appName=the-sandtrap";
 
 
