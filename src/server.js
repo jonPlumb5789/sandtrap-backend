@@ -3,40 +3,34 @@ const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
-const authRoutes = require('./routes/authRoutes'); // Authentication routes
-const menuRoutes = require('./routes/menuRoutes'); // Public menu routes
-const adminRoutes = require('./routes/adminRoutes'); // Admin CRUD routes for menu items
+const authRoutes = require('./routes/authRoutes');
+const menuRoutes = require('./routes/menuRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
-// Load environment variables from .env file
 dotenv.config({ path: './.env' });
 
 // Set up Express app
 const app = express();
-app.use(express.json()); // To parse JSON bodies
-
-// Configure CORS
-const corsOptions = {
-  origin: process.env.FRONTEND_URL || '*', // Allow only frontend URL or all origins in development
-  optionsSuccessStatus: 200,
-};
-app.use(cors(corsOptions));
+app.use(express.json());
+app.use(cors());
 
 const PORT = process.env.PORT || 5000;
 
-// Connect to MongoDB
+// Connect to MongoDB with increased timeout
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
+  connectTimeoutMS: 30000, // 30 seconds
 })
   .then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.log('Failed to connect to MongoDB', err));
+  .catch(err => console.log('MongoDB connection error:', err));
 
 // Public routes
-app.use('/api/auth', authRoutes); // Routes for /register and /login
-app.use('/api/menu', menuRoutes); // Public menu route
+app.use('/api/auth', authRoutes);
+app.use('/api/menu', menuRoutes);
 
 // Admin routes (with authentication middleware)
-app.use('/api/admin', adminRoutes); // Admin CRUD routes for menu items and categories
+app.use('/api/admin', adminRoutes);
 
 // Start the server
 app.listen(PORT, () => {
