@@ -1,51 +1,38 @@
 // Import dependencies
 const express = require('express');
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
 const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
 const menuRoutes = require('./routes/menuRoutes');
 const adminRoutes = require('./routes/adminRoutes');
-const { MongoClient, ServerApiVersion } = require('mongodb');
 
-// MongoDB connection URI
-const uri = "mongodb+srv://jonplumb89:KEXeUDnC9Lo5kxLG@the-sandtrap.rzuyf.mongodb.net/the-sandtrap?retryWrites=true&w=majority&ssl=true";
-//const uri = "mongodb+srv://jonplumb89:KEXeUDnC9Lo5kxL@the-sandtrap.rzuyf.mongodb.net/?retryWrites=true&w=majority&appName=the-sandtrap";
-
+dotenv.config({ path: './.env' });
 
 // Set up Express app
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 10000;
 
-// Connect to MongoDB
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
+// Connect to MongoDB with increased timeout
+mongoose.connect(process.env.MONGO_URI, {
+  connectTimeoutMS: 30000, // 30 seconds for initial connection
+  serverSelectionTimeoutMS: 60000, // 60 seconds to find a MongoDB server
+  socketTimeoutMS: 45000, // 45 seconds for socket operations
+})
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.log('MongoDB connection error:', err));
+
+// Public routes
+app.use('/api/auth', authRoutes);
+app.use('/api/menu', menuRoutes);
+
+// Admin routes (with authentication middleware)
+app.use('/api/admin', adminRoutes);
+
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
-
-async function connectToMongoDB() {
-  try {
-    await client.connect();
-    console.log("Connected to MongoDB!");
-
-    // Public routes
-    app.use('/api/auth', authRoutes);
-    app.use('/api/menu', menuRoutes);
-
-    // Admin routes (with authentication middleware)
-    app.use('/api/admin', adminRoutes);
-
-    // Start the server
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-    });
-  } catch (error) {
-    console.log("MongoDB connection error:", error);
-  }
-}
-
-connectToMongoDB().catch(console.error);
